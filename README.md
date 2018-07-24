@@ -1,4 +1,4 @@
-Asynchronous [`node-hid`](https://github.com/node-hid/node-hid) wrapper
+Asynchronous `node-hid` wrapper
 ===============================
 
 ## Motivation
@@ -15,21 +15,21 @@ Main manager/service class; usually there should be one instance per application
 
 #### Constructor
 
-> `NodeHidAsync()`
+`NodeHidAsync()`
 *   Creates an instance of the manager class.
 
 #### Methods
 
-> *`nodeHidAsync`*`.devices()`
+*`nodeHidAsync`*`.devices()`
 *   Returns a Promise that resolves to an array of `Device`s (i.e. the same array that would be returned from a `devices()` call in `node-hid`).
 
-> *`nodeHidAsync`*`.open(path)`
+*`nodeHidAsync`*`.open(path)`
 *   Returns a Promise that resolves to a `NodeHidAsyncDevice` connected to the device at the specified platform-specific path.
 
-> *`nodeHidAsync`*`.open(vid, pid)`
+*`nodeHidAsync`*`.open(vid, pid)`
 *   Returns a Promise that resolves to a `NodeHidAsyncDevice` connected to the first device with the specified vendor and product ID.
 
-> *`nodeHidAsync`*`.destroy()`
+*`nodeHidAsync`*`.destroy()`
 *   Immediately shuts down all processes associated with this instance of `NodeHidAsync` and releases resources.
 *   Subsequently calling any method on the instance results in undefined behavior.
 
@@ -39,35 +39,35 @@ Represents a HID that has been opened for communication. Created by calling `ope
 
 #### Methods
 
-> *`device`*`.dataObs()`
+*`device`*`.dataObs()`
 *   Returns an Observable that emits received data packets. The Observable terminates when the device is closed.
 *   The event payload is a Node `Buffer`. Note that on Windows the actual data will be prepended with a HID report number, as with unwrapped `node-hid`.
 
-> *`device`*`.errorObs()`
+*`device`*`.errorObs()`
 *   Returns an Observable that emits errors. The Observable terminates when the device is closed.
 
-> *`device`*`.write(data)`
+*`device`*`.write(data)`
 *   Returns a Promise that resolves with the number of bytes actually written to the device.
 *   `data` is an array of numbers or a Node `Buffer`. Note that on Windows this must be prepended with a HID report number (generally zero), as with unwrapped `node-hid`.
 
-> *`device`*`.close()`
+*`device`*`.close()`
 *   Returns a Promise that resolves when the device has been closed. Once the Promise has resolved, the device's worker process has been terminated.
 *   Subsequently calling any method on the device results in undefined behavior.
 
-> *`device`*`.pause()`
+*`device`*`.pause()`
 *   Same as `node-hid` `pause()`; appears this causes all packets to be dropped until a subsequent call to `resume()`.
 *   Not tested.
 
-> *`device`*`.resume()`
+*`device`*`.resume()`
 *   Same as `node-hid` `resume()`: restarts packet reception.
 *   Note that, unlike `node-hid`, calling `dataObs()` does not automatically call this function.
 *   Not tested.
 
-> *`device`*`.sendFeatureReport(data)`
+*`device`*`.sendFeatureReport(data)`
 *   Returns a Promise that resolves with the number of bytes actually written to the device.
 *   As with `node-hid`, the first byte must be a report ID.
 
-> *`device`*`.getFeatureReport(id, length)`
+*`device`*`.getFeatureReport(id, length)`
 *   Returns a Promise that resolves with a `Buffer` containing the data read.
 
 ## Notes
