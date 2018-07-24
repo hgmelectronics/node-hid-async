@@ -1,0 +1,29 @@
+{
+    "env": "node",
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "declaration": true,
+        "emitDecoratorMetadata": true,
+        "experimentalDecorators": true,
+        "lib": [
+            "es2017"
+        ],
+        "moduleResolution": "node",
+        "noStrictGenericChecks": true,
+        "outDir": "lib",
+        "sourceMap": true,
+        "target": "es5",
+        "types": [
+            "node"
+        ],
+        "typeRoots": [
+            "node_modules/@types"
+        ]
+    },
+    "include": [
+        "src/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}
