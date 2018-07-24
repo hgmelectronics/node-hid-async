@@ -13,7 +13,7 @@
         "prepare": "tsc"
     },
     "license": "MIT",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "dependencies": {
         "node-hid": "^0.7.3",
         "rxjs": "^6.2.2"
@@ -22,5 +22,11 @@
         "@types/node": "^10.5.2",
         "@types/node-hid": "^0.7.0",
         "typescript": "^2.6.2"
+    },
+    "browser": {
+        "child_process": false,
+        "events": false,
+        "path": false,
+        "process": false
     }
 }
