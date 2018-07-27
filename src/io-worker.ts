@@ -72,9 +72,9 @@ process.on('message', (msg: { cmd: string, data?: any }) => {
             result = handler(msg.data);
         }
         catch (err) {
-            process.send({ type: msg.cmd + 'Error', data: err });
+            process.send({ cmd: msg.cmd, type: 'error', data: err });
             return;
         }
-        process.send({ type: msg.cmd + 'Done', data: result });
+        process.send({ cmd: msg.cmd, type: 'done', data: result });
     }
 });

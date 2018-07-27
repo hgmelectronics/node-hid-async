@@ -94,19 +94,25 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
             this.mErrorSubject.next(msg.data);
         }
         else {
-            this.mDispatcher.emit(msg.type, msg.data);
+            this.mDispatcher.emit(msg.cmd, { type: msg.type, data: msg.data });
         }
     }
 
     private sendCommand(msg: { cmd: string, data?: any }): Promise<any> {
         return new Promise((resolve, reject) => {
-            this.mDispatcher.once(msg.cmd + 'Done', resolve);
-            this.mDispatcher.once(msg.cmd + 'Error', reject);
+            const handler = (arg: { type: 'done' | 'error', data: any }) => {
+                if (arg.type === 'done') {
+                    resolve(arg.data);
+                }
+                else {
+                    reject(arg.data);
+                }
+            };
+            this.mDispatcher.once(msg.cmd, handler);
             this.mWorker.send(msg, (err: Error) => {
                 if (err) {
                     reject(err);
-                    this.mDispatcher.removeListener(msg.cmd + 'Done', resolve);
-                    this.mDispatcher.removeListener(msg.cmd + 'Error', reject);
+                    this.mDispatcher.removeListener(msg.cmd, handler);
                 }
             });
         });
