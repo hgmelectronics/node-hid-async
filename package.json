@@ -13,15 +13,15 @@
         "prepare": "tsc"
     },
     "license": "MIT",
-    "version": "0.2.0",
+    "version": "0.2.1",
     "dependencies": {
-        "node-hid": "^1.0.0",
-        "rxjs": "^6.2.2"
+        "node-hid": "^1.2.0",
+        "rxjs": "^6.5.5"
     },
     "devDependencies": {
-        "@types/node": "^10.5.2",
-        "@types/node-hid": "^0.7.0",
-        "typescript": "^2.6.2"
+        "@types/node": "^13.11.0",
+        "@types/node-hid": "^1.2.0",
+        "typescript": "^3.8.3"
     },
     "browser": {
         "child_process": false,
