@@ -72,7 +72,7 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
 
     getFeatureReport(id: number, length: number): Promise<Buffer> {
         return this.sendCommand({ cmd: 'getFeatureReport', data: { id: id, length: length } })
-            .then(data => new Buffer(data));
+            .then(data => Buffer.from(data));
     }
 
     destroy = () => {
@@ -88,7 +88,7 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
 
     private onMessage = (msg: any) => {
         if (msg.type === 'eventData') {
-            this.mDataSubject.next(new Buffer(msg.data));
+            this.mDataSubject.next(Buffer.from(msg.data));
         }
         else if (msg.type === 'eventError') {
             this.mErrorSubject.next(msg.data);
