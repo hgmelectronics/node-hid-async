@@ -20,14 +20,14 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
     constructor() {
         Process.on('exit', this.destroy);
 
-        this.mWorker = ChildProcess.fork(Path.join(__dirname, 'io-worker.js'));
-        this.mWorker.on('message', this.onMessage);
+        this.worker = ChildProcess.fork(Path.join(__dirname, 'io-worker.js'));
+        this.worker.on('message', this.onMessage);
     }
 
-    private mWorker: ChildProcess.ChildProcess;
-    private mDispatcher = new EventEmitter();
-    private mDataSubject = new Subject<Buffer>();
-    private mErrorSubject = new Subject<any>();
+    private worker: ChildProcess.ChildProcess;
+    private dispatcher = new EventEmitter();
+    private dataSubject = new Subject<Buffer>();
+    private errorSubject = new Subject<any>();
 
     openPath(path: string): Promise<void> {
         return this.sendCommand({ cmd: 'openPath', data: path });
@@ -38,11 +38,11 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
     }
 
     dataObs() {
-        return this.mDataSubject.asObservable();
+        return this.dataSubject.asObservable();
     }
 
     errorObs() {
-        return this.mErrorSubject.asObservable();
+        return this.errorSubject.asObservable();
     }
 
     write(values: number[] | Buffer): Promise<number> {
@@ -76,25 +76,25 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
     }
 
     destroy = () => {
-        if (this.mWorker) {
-            this.mWorker.removeAllListeners();
-            this.mWorker.kill();
+        if (this.worker) {
+            this.worker.removeAllListeners();
+            this.worker.kill();
         }
-        this.mDispatcher.removeAllListeners();
-        this.mDataSubject.complete();
-        this.mErrorSubject.complete();
+        this.dispatcher.removeAllListeners();
+        this.dataSubject.complete();
+        this.errorSubject.complete();
         process.removeListener('exit', this.destroy);
     }
 
     private onMessage = (msg: any) => {
         if (msg.type === 'eventData') {
-            this.mDataSubject.next(Buffer.from(msg.data));
+            this.dataSubject.next(Buffer.from(msg.data));
         }
         else if (msg.type === 'eventError') {
-            this.mErrorSubject.next(msg.data);
+            this.errorSubject.next(msg.data);
         }
         else {
-            this.mDispatcher.emit(msg.cmd, { type: msg.type, data: msg.data });
+            this.dispatcher.emit(msg.cmd, { type: msg.type, data: msg.data });
         }
     }
 
@@ -108,11 +108,11 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
                     reject(arg.data);
                 }
             };
-            this.mDispatcher.once(msg.cmd, handler);
-            this.mWorker.send(msg, (err: Error) => {
+            this.dispatcher.once(msg.cmd, handler);
+            this.worker.send(msg, (err: Error) => {
                 if (err) {
                     reject(err);
-                    this.mDispatcher.removeListener(msg.cmd, handler);
+                    this.dispatcher.removeListener(msg.cmd, handler);
                 }
             });
         });
@@ -121,16 +121,16 @@ class NodeHidAsyncIo implements NodeHidAsyncDevice {
 
 export class NodeHidAsync {
     constructor() {
-        this.mDeviceWorker = ChildProcess.fork(Path.join(__dirname, 'devices-worker.js'));
+        this.deviceWorker = ChildProcess.fork(Path.join(__dirname, 'devices-worker.js'));
         Process.on('exit', this.doDestroy);
     }
 
-    private mDeviceWorker: ChildProcess.ChildProcess;
-    private mIoDevices = new Set<NodeHidAsyncIo>();
+    private deviceWorker: ChildProcess.ChildProcess;
+    private ioDevices = new Set<NodeHidAsyncIo>();
 
     devices(): Promise<Device[]> {
         return new Promise((resolve, reject) => {
-            this.mDeviceWorker.once('message', (message: { cmd: 'devices', result?: Device[], error?: any }) => {
+            this.deviceWorker.once('message', (message: { cmd: 'devices', result?: Device[], error?: any }) => {
                 if (message.cmd === 'devices') {
                     if (message.error) {
                         reject(message.error);
@@ -140,7 +140,7 @@ export class NodeHidAsync {
                     }
                 }
             });
-            this.mDeviceWorker.send({ cmd: 'devices' }, (err: Error) => {
+            this.deviceWorker.send({ cmd: 'devices' }, (err: Error) => {
                 if (err) {
                     reject(err);
                 }
@@ -161,8 +161,8 @@ export class NodeHidAsync {
         const openPromise = (typeof first === 'number') ? device.openId(first, pid) : device.openPath(first);
         return openPromise
             .then(() => {
-                this.mIoDevices.add(device);
-                device.errorObs().toPromise().then(() => this.mIoDevices.delete(device));    // when error observable terminates, the device has been destroyed
+                this.ioDevices.add(device);
+                device.errorObs().toPromise().then(() => this.ioDevices.delete(device));    // when error observable terminates, the device has been destroyed
                 return device;
             })
             .catch(err => {
@@ -176,11 +176,11 @@ export class NodeHidAsync {
     }
 
     private doDestroy = () => {
-        if (this.mDeviceWorker) {
-            this.mDeviceWorker.removeAllListeners();
-            this.mDeviceWorker.kill();
+        if (this.deviceWorker) {
+            this.deviceWorker.removeAllListeners();
+            this.deviceWorker.kill();
         }
-        this.mIoDevices.forEach(device => device.destroy());
+        this.ioDevices.forEach(device => device.destroy());
         Process.removeListener('exit', this.doDestroy);
     }
 }
