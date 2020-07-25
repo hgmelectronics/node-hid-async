@@ -7,7 +7,7 @@ function hookEvents() {
         process.send({ type: 'eventData', data: Array.from(values) })
     });
     dev.on('error', err => {
-        process.send({ type: 'eventError', data: err});
+        process.send({ type: 'eventError', data: typeof err?.toString === 'function' ? err.toString() : err });
     });
 }
 

@@ -6,8 +6,8 @@ process.on('message', (message: { cmd: string }) => {
             const devs = devices();
             process.send({ cmd: 'devices', result: devs });
         }
-        catch(err) {
-            process.send({ cmd: 'devices', error: err });
+        catch (err) {
+            process.send({ cmd: 'devices', error: typeof err?.toString === 'function' ? err.toString() : err });
         }
     }
 });
