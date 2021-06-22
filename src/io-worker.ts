@@ -78,3 +78,7 @@ process.on('message', (msg: { cmd: string, data?: any }) => {
         process.send({ cmd: msg.cmd, type: 'done', data: result });
     }
 });
+
+process.on('disconnect', () => {
+    dev?.close();
+});
